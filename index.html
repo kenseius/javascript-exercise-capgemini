@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rewards Program</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 700px;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem 1rem;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    caption {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reward Points Summary</h1>
+  <div id="table-container">Loading...</div>
+
+  <script>
+    // --- Mock async API call to fetch transaction data ---
+    function fetchTransactions() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve([
+            { customer: "Alice", date: "2025-06-15", amount: 120 },
+            { customer: "Alice", date: "2025-07-03", amount: 75 },
+            { customer: "Alice", date: "2025-07-20", amount: 200 },
+            { customer: "Alice", date: "2025-08-01", amount: 50 },
+            { customer: "Bob", date: "2025-06-10", amount: 45 },
+            { customer: "Bob", date: "2025-07-14", amount: 130 },
+            { customer: "Bob", date: "2025-08-22", amount: 90 },
+            { customer: "Carol", date: "2025-06-25", amount: 220 },
+            { customer: "Carol", date: "2025-07-11", amount: 95 },
+            { customer: "Carol", date: "2025-08-05", amount: 180 },
+          ]);
+        }, 1000); // simulate delay
+      });
+    }
+
+    // --- Function to calculate points for a single transaction ---
+    function calculatePoints(amount) {
+      let points = 0;
+      if (amount > 100) {
+        points += (amount - 100) * 2;
+        points += 50;
+      } else if (amount > 50) {
+        points += (amount - 50);
+      }
+      return points;
+    }
+
+    // --- Main function to process rewards ---
+    async function processRewards() {
+      const transactions = await fetchTransactions();
+      const rewards = {};
+
+      transactions.forEach(({ customer, date, amount }) => {
+        const points = calculatePoints(amount);
+        const month = new Date(date).toLocaleString("default", { month: "short" });
+
+        if (!rewards[customer]) rewards[customer] = { total: 0 };
+        if (!rewards[customer][month]) rewards[customer][month] = 0;
+
+        rewards[customer][month] += points;
+        rewards[customer].total += points;
+      });
+
+      return rewards;
+    }
+
+    // --- Render results into an HTML table ---
+    processRewards().then((rewards) => {
+      const container = document.getElementById("table-container");
+
+      // Collect all months across customers
+      const months = Array.from(
+        new Set(
+          Object.values(rewards)
+            .flatMap((data) => Object.keys(data))
+            .filter((k) => k !== "total")
+        )
+      );
+
+      let html = `
+        <table>
+          <caption>Points Earned Per Month</caption>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              ${months.map((m) => `<th>${m}</th>`).join("")}
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${Object.entries(rewards)
+              .map(([customer, data]) => {
+                return `
+                  <tr>
+                    <td><strong>${customer}</strong></td>
+                    ${months.map((m) => `<td>${data[m] || 0}</td>`).join("")}
+                    <td><strong>${data.total}</strong></td>
+                  </tr>
+                `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = html;
+    });
+  </script>
+</body>
+</html>
