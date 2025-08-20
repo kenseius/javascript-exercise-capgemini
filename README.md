@@ -1,6 +1,13 @@
 # javascript-exercise-capgemini
-JS Exercise
 
+
+## Table of Contents 
+
+* Index.html = self-contained HTML page, with Javascript solution embedded.
+* Rewards.js = just the Javascript solution
+* react.jsx = the solution, using React (assuming tailwindcss in use for UI)
+
+## JS Exercise Assignment 
 
 Complete the below exercise using Javascript: 
 
